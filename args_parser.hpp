@@ -29,7 +29,7 @@ struct args_parser
 	using value_view = std::string_view;
 
 	template <typename T>
-	constexpr static bool is_string = std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>;
+	static constexpr bool is_string = std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>;
 
 	///
 	/// \brief Each entry is a key-value pair
