@@ -10,8 +10,7 @@
 #include <utility>
 #include <vector>
 
-namespace kt
-{
+namespace kt {
 ///
 /// \brief Container wrapper for parsing command line arguments
 ///
@@ -21,8 +20,7 @@ namespace kt
 /// 	- Search for values among parsed keys (returns nullptr if not found)
 ///
 template <template <typename...> typename Cont = std::deque, typename... Args>
-struct args_parser
-{
+struct args_parser {
 	using key = std::string;
 	using value = std::string;
 	using key_view = std::string_view;
@@ -34,8 +32,7 @@ struct args_parser
 	///
 	/// \brief Each entry is a key-value pair
 	///
-	struct entry
-	{
+	struct entry {
 		key k;
 		value v;
 	};
@@ -66,55 +63,39 @@ struct args_parser
 };
 
 template <template <typename...> typename Cont, typename... Args>
-typename args_parser<Cont, Args...>::type_t const& args_parser<Cont, Args...>::parse(int argc, char const* const* argv)
-{
+typename args_parser<Cont, Args...>::type_t const& args_parser<Cont, Args...>::parse(int argc, char const* const* argv) {
 	auto key_value = [](std::string_view token, std::size_t equals) -> entry {
 		auto k = key(token.substr(0, equals));
 		auto v = equals < token.size() - 1 ? key(token.substr(equals + 1)) : value();
 		return {std::move(k), std::move(v)};
 	};
 	entries.clear();
-	for (int i = 0; i < argc; ++i)
-	{
+	for (int i = 0; i < argc; ++i) {
 		std::string_view token = argv[i];
-		if (!token.empty())
-		{
-			if (token.at(0) == '-')
-			{
-				if (token.size() > 1 && token.at(1) == '-')
-				{
+		if (!token.empty()) {
+			if (token.at(0) == '-') {
+				if (token.size() > 1 && token.at(1) == '-') {
 					token = token.substr(2);
 					key k;
 					value v;
 					std::size_t const equals = token.find('=');
-					if (equals != std::string::npos)
-					{
+					if (equals != std::string::npos) {
 						entries.push_back(key_value(std::move(token), equals));
-					}
-					else
-					{
+					} else {
 						entries.push_back({key(std::move(token)), {}});
 					}
-				}
-				else
-				{
+				} else {
 					token = token.substr(1);
 					std::size_t const equals = token.find('=');
-					if (equals != std::string::npos)
-					{
+					if (equals != std::string::npos) {
 						entries.push_back(key_value(std::move(token), equals));
-					}
-					else
-					{
-						for (auto c : token)
-						{
+					} else {
+						for (auto c : token) {
 							entries.push_back({key(1, c), {}});
 						}
 					}
 				}
-			}
-			else
-			{
+			} else {
 				entries.push_back({key(std::move(token)), {}});
 			}
 		}
@@ -124,24 +105,20 @@ typename args_parser<Cont, Args...>::type_t const& args_parser<Cont, Args...>::p
 
 template <template <typename...> typename Cont, typename... Args>
 template <template <typename...> typename C, typename T, typename... CArgs>
-typename args_parser<Cont, Args...>::type_t const& args_parser<Cont, Args...>::parse(C<T, CArgs...> const& input)
-{
+typename args_parser<Cont, Args...>::type_t const& args_parser<Cont, Args...>::parse(C<T, CArgs...> const& input) {
 	static_assert(is_string<T>, "Invalid type!");
 	std::vector<char const*> args;
 	args.reserve(input.size());
-	for (auto const& str : input)
-	{
+	for (auto const& str : input) {
 		args.push_back(str.data());
 	}
 	return parse((int)args.size(), args.data());
 }
 
 template <template <typename...> typename Cont, typename... Args>
-typename args_parser<Cont, Args...>::value const* args_parser<Cont, Args...>::find(key const& key) const
-{
+typename args_parser<Cont, Args...>::value const* args_parser<Cont, Args...>::find(key const& key) const {
 	auto search = std::find_if(entries.begin(), entries.end(), [key](auto const& entry) -> bool { return entry.k == key; });
-	if (search != entries.end())
-	{
+	if (search != entries.end()) {
 		return &search->v;
 	}
 	return nullptr;
