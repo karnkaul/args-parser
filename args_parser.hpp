@@ -73,8 +73,8 @@ typename args_parser<Cont, Args...>::type_t const& args_parser<Cont, Args...>::p
 	for (int i = 0; i < argc; ++i) {
 		std::string_view token = argv[i];
 		if (!token.empty()) {
-			if (token.at(0) == '-') {
-				if (token.size() > 1 && token.at(1) == '-') {
+			if (token[0] == '-') {
+				if (token.size() > 1 && token[1] == '-') {
 					token = token.substr(2);
 					key k;
 					value v;
